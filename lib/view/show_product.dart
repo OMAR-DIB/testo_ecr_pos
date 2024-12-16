@@ -2,8 +2,11 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:testooo/controller/cart_item_controller.dart';
 import 'package:testooo/controller/product_provider.dart';
 import 'package:testooo/controller/product_selection_controller.dart';
+import 'package:testooo/models/cart_item.dart';
+import 'package:testooo/view/editable_text_field.dart';
 
 class ShowProduct extends StatelessWidget {
   const ShowProduct({super.key});
@@ -11,30 +14,18 @@ class ShowProduct extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final productProvider = Provider.of<ProductProvider>(context);
-    final selectionController =
-        Provider.of<ProductSelectionController>(context);
+    final cartItemController = Provider.of<CartItemController>(context);
 
     return Scaffold(
       appBar: AppBar(
-        // title: const Text('Show Products'),
         title: PreferredSize(
           preferredSize: const Size.fromHeight(kToolbarHeight),
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
-              // controller: searchController,
               decoration: InputDecoration(
                 hintText: 'Search products...',
                 prefixIcon: const Icon(Icons.search),
-                // suffixIcon: searchController.text.isNotEmpty
-                //   ? IconButton(
-                //       icon: const Icon(Icons.clear),
-                //       onPressed: () {
-                //         // searchController.clear();
-                //         // _filterProducts('');
-                //       },
-                //     )
-                //   : null,
                 filled: true,
                 fillColor: Colors.grey[300],
                 border: OutlineInputBorder(
@@ -49,7 +40,6 @@ class ShowProduct extends StatelessWidget {
                   ),
                 ),
               ),
-              // onChanged: _filterProducts,
             ),
           ),
         ),
@@ -62,19 +52,18 @@ class ShowProduct extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: GridView.builder(
-                // SliverGridDelegateWithFixedCrossAxisCount
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 4, // Number of columns
-                  crossAxisSpacing: 8, // Spacing between columns
-                  mainAxisSpacing: 8, // Spacing between rows
-                  childAspectRatio: 3 / 4, // Aspect ratio for cards
+                  crossAxisCount: 4,
+                  crossAxisSpacing: 8,
+                  mainAxisSpacing: 8,
+                  childAspectRatio: 3 / 4,
                 ),
                 itemCount: productProvider.products.length,
                 itemBuilder: (context, index) {
                   final product = productProvider.products[index];
                   return GestureDetector(
                     onTap: () {
-                      selectionController.selectProduct(product);
+                      cartItemController.addProduct(product);
                     },
                     child: Card(
                       elevation: 4,
@@ -86,14 +75,12 @@ class ShowProduct extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Placeholder for product image
                             Expanded(
                               child: Container(
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(8),
                                   color: Colors.grey[300],
                                 ),
-                                // height: 120,
                                 child: const Center(
                                   child: Icon(
                                     Icons.image,
@@ -144,7 +131,7 @@ class ShowProduct extends StatelessWidget {
           Expanded(
             flex: 1,
             child: Padding(
-              padding: const EdgeInsets.only(left: 16,top: 16,right: 16,bottom: 7),
+              padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -171,7 +158,7 @@ class ShowProduct extends StatelessWidget {
                           icon:
                               const Icon(Icons.clear_all, color: Colors.white),
                           onPressed: () {
-                            // selectionController.clearSelection();
+                            cartItemController.clearCart();
                           },
                         ),
                       ],
@@ -187,241 +174,118 @@ class ShowProduct extends StatelessWidget {
                             fontWeight: FontWeight.bold, fontSize: 18),
                       ),
                       Text(
+                        '%',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 18),
+                      ),
+                      Text(
+                        'Qty',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 18),
+                      ),
+                      Text(
                         'Price',
                         style: TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 18),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 16),
                   Expanded(
                     child: ListView.builder(
-                      itemCount: selectionController.clickedProducts.length,
+                      itemCount: cartItemController.cartItems.length,
                       itemBuilder: (context, index) {
-                        final clickedProduct =
-                            selectionController.clickedProducts[index];
+                        final cartItem = cartItemController.cartItems[index];
+                        
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 8.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    clickedProduct.name,
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.w400,
-                                        fontSize: 18),
+                          // use Drawer here
+                          child: Dismissible( 
+                            // Duration movementDuration = const Duration(milliseconds: 200),
+                            key: ValueKey(
+                                cartItem.product.id), // Unique key for the item
+                            direction: DismissDirection
+                                .endToStart, // Slide from right to left
+                            background: Container(
+                              color: Colors.red,
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
+                              alignment: Alignment.centerRight,
+                              child:
+                                  const Icon(Icons.delete, color: Colors.white),
+                            ),
+                            
+                            onDismissed: (direction) {
+                              cartItemController.removeProduct(
+                                  cartItem.product); // Remove item from cart
+                                  cartItemController.dismissProduct(cartItem.product);
+                            },
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                // Product Name
+                                Expanded(
+                                  flex: 3,
+                                  child: Text(
+                                    cartItem.product.name,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(fontSize: 16),
                                   ),
-                                  Text(
-                                    '\$${clickedProduct.price.toStringAsFixed(2)}',
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.w400,
-                                        fontSize: 18),
+                                ),
+                                const SizedBox(width: 8),
+                                // Editable Discount Field
+                                Expanded(
+                                  flex: 2,
+                                  child: EditableTextField(
+                                    value: cartItem.discount,
+                                    hintText: 'Enter discount',
+                                    onChanged: (value) {
+                                      final discount =
+                                          value ?? 0.0;
+                                      cartItemController.updateDiscount(
+                                          cartItem.product, discount);
+                                    },
                                   ),
-                                ],
-                              ),
-                              const Divider(),
-                            ],
+                                ),
+                                const SizedBox(width: 8),
+                                // Quantity
+                                Expanded(
+                                  flex: 1,
+                                  child: Text(
+                                    '${cartItem.quantity}',
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(color: Colors.grey),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                // Total Price
+                                Expanded(
+                                  flex: 2,
+                                  child: Text(
+                                    '\$${cartItem.totalPrice.toStringAsFixed(2)}',
+                                    textAlign: TextAlign.right,
+                                    style: const TextStyle(fontSize: 16),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         );
                       },
                     ),
                   ),
-                  const SizedBox(height: 6),
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      color: Colors.grey[300],
+                  // Discount Field
+
+                  const SizedBox(height: 16),
+                  // Updated Total Price
+                  Text(
+                    'Total: \$${cartItemController.totalPrice.toStringAsFixed(2)}',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Sub Total: ',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                color: Colors.blue[400],
-                              ),
-                            ),
-                            Text(
-                              '\$${selectionController.totalPrice.toStringAsFixed(2)}',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                color: Colors.blue[400],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 6,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'VAT: ',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                color: Colors.blue[400],
-                              ),
-                            ),
-                            Text(
-                              '\$2.37',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                color: Colors.blue[400],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const Divider(),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Total: ',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                color: Colors.blue[400],
-                              ),
-                            ),
-                            Text(
-                              '\$${(selectionController.totalPrice > 0 ? selectionController.totalPrice - 2.37 : selectionController.totalPrice).toStringAsFixed(2)}  ',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                color: Colors.blue[400],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 3,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(3),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          color: Colors.red[400],
-                        ),
-                        child: TextButton(
-                          onPressed: (){},
-                          child: const Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.delete, size: 24),
-                               SizedBox(
-                                  height:
-                                      2), // Small spacing between icon and text
-                               Text(
-                                "Clear All",
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.all(3),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          color: Colors.green[400],
-                        ),
-                        child: TextButton(
-                          onPressed: (){},
-                          child: const Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.payment, size: 24),
-                               SizedBox(
-                                  height:
-                                      2), // Small spacing between icon and text
-                               Text(
-                                "Pay",
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                            
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.all(3),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          color: Colors.grey[400],
-                        ),
-                        child: TextButton(
-                          onPressed: (){},
-                          child: const Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.print, size: 24),
-                               SizedBox(
-                                  height:
-                                      2), // Small spacing between icon and text
-                               Text(
-                                "Print",
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.all(3),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          color: Colors.blue[300],
-                        ),
-                        child: TextButton(
-                          onPressed: (){},
-                          child: const Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.discount, size: 24),
-                               SizedBox(
-                                  height:
-                                      2), // Small spacing between icon and text
-                               Text(
-                                "Discount",
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
                   ),
                 ],
               ),

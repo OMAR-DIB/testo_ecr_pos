@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:testooo/controller/cart_item_controller.dart';
 import 'package:testooo/controller/product_provider.dart';
 import 'package:testooo/controller/product_selection_controller.dart';
 import 'package:testooo/main.dart';
@@ -21,7 +22,7 @@ class ProductScreen extends StatelessWidget {
             ProductRepository(gloablObx.store.box<Product>()),
           )..fetchProducts(),
         ),
-        ChangeNotifierProvider(create: (_) => ProductSelectionController()),
+        ChangeNotifierProvider(create: (_) => CartItemController()),
       ],
       child: Builder(
         builder: (context) {
@@ -45,7 +46,7 @@ class ProductScreen extends StatelessWidget {
                               providers: [
                                 ChangeNotifierProvider.value(value: provider),
                                 ChangeNotifierProvider(
-                                  create: (_) => ProductSelectionController(),
+                                  create: (_) => CartItemController(),
                                 ),
                               ],
                               child: const ShowProduct(),
