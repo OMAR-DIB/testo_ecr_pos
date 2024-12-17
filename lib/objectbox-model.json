@@ -36,11 +36,99 @@
         }
       ],
       "relations": []
+    },
+    {
+      "id": "2:8250816634690839412",
+      "lastPropertyId": "3:2110130391696795799",
+      "name": "Transaction",
+      "properties": [
+        {
+          "id": "1:4194154230538990093",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:6799843038245719337",
+          "name": "transactionDate",
+          "type": 9
+        },
+        {
+          "id": "3:2110130391696795799",
+          "name": "isPaymentConfirmed",
+          "type": 1
+        }
+      ],
+      "relations": [
+        {
+          "id": "1:19893120617664781",
+          "name": "lines",
+          "targetId": "3:2735234876302347974"
+        }
+      ]
+    },
+    {
+      "id": "3:2735234876302347974",
+      "lastPropertyId": "4:8520938700662906179",
+      "name": "TransactionLine",
+      "properties": [
+        {
+          "id": "1:5799466038188551540",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:6728411791882589804",
+          "name": "itemName",
+          "type": 9
+        },
+        {
+          "id": "3:6129764226755753393",
+          "name": "quantity",
+          "type": 6
+        },
+        {
+          "id": "4:8520938700662906179",
+          "name": "price",
+          "type": 8
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "4:4652221415375332005",
+      "lastPropertyId": "4:978387410737348747",
+      "name": "User",
+      "properties": [
+        {
+          "id": "1:2014045289269937078",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:6365573190315137780",
+          "name": "firstName",
+          "type": 9
+        },
+        {
+          "id": "3:5667800059890137017",
+          "name": "lastName",
+          "type": 9
+        },
+        {
+          "id": "4:978387410737348747",
+          "name": "role",
+          "type": 9
+        }
+      ],
+      "relations": []
     }
   ],
-  "lastEntityId": "1:3903664865755418506",
+  "lastEntityId": "4:4652221415375332005",
   "lastIndexId": "0:0",
-  "lastRelationId": "0:0",
+  "lastRelationId": "1:19893120617664781",
   "lastSequenceId": "0:0",
   "modelVersion": 5,
   "modelVersionParserMinimum": 5,

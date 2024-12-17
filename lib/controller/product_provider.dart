@@ -4,7 +4,7 @@ import 'package:testooo/models/product.dart';
 import 'package:testooo/repo/product_repo.dart';
 
 class ProductProvider extends ChangeNotifier{
-  final productBox = gloablObx.store.box<Product>();
+  // final productBox = gloablObx.store.box<Product>();
   final ProductRepository _repository;
   List<Product> _products = [];
 

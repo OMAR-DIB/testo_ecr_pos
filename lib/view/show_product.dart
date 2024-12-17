@@ -4,9 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:testooo/controller/cart_item_controller.dart';
 import 'package:testooo/controller/product_provider.dart';
-import 'package:testooo/controller/product_selection_controller.dart';
+
+import 'package:testooo/main.dart';
 import 'package:testooo/models/cart_item.dart';
+import 'package:testooo/models/transaction/transaction.dart';
+import 'package:testooo/models/transaction/transaction_repo.dart';
 import 'package:testooo/view/editable_text_field.dart';
+import 'package:testooo/view/payment_screen.dart';
 
 class ShowProduct extends StatelessWidget {
   const ShowProduct({super.key});
@@ -196,86 +200,71 @@ class ShowProduct extends StatelessWidget {
                       itemCount: cartItemController.cartItems.length,
                       itemBuilder: (context, index) {
                         final cartItem = cartItemController.cartItems[index];
-                        
+
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 8.0),
-                          // use Drawer here
-                          child: Dismissible( 
-                            // Duration movementDuration = const Duration(milliseconds: 200),
-                            key: ValueKey(
-                                cartItem.product.id), // Unique key for the item
-                            direction: DismissDirection
-                                .endToStart, // Slide from right to left
-                            background: Container(
-                              color: Colors.red,
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 16),
-                              alignment: Alignment.centerRight,
-                              child:
-                                  const Icon(Icons.delete, color: Colors.white),
-                            ),
-                            
-                            onDismissed: (direction) {
-                              cartItemController.removeProduct(
-                                  cartItem.product); // Remove item from cart
-                                  cartItemController.dismissProduct(cartItem.product);
-                            },
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                // Product Name
-                                Expanded(
-                                  flex: 3,
-                                  child: Text(
-                                    cartItem.product.name,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(fontSize: 16),
-                                  ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              // Product Name
+                              Expanded(
+                                flex: 3,
+                                child: Text(
+                                  cartItem.product.name,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(fontSize: 16),
                                 ),
-                                const SizedBox(width: 8),
-                                // Editable Discount Field
-                                Expanded(
-                                  flex: 2,
-                                  child: EditableTextField(
-                                    value: cartItem.discount,
-                                    hintText: 'Enter discount',
-                                    onChanged: (value) {
-                                      final discount =
-                                          value ?? 0.0;
-                                      cartItemController.updateDiscount(
-                                          cartItem.product, discount);
-                                    },
-                                  ),
+                              ),
+                              const SizedBox(width: 8),
+                              // Editable Discount Field
+                              Expanded(
+                                flex: 2,
+                                child: EditableTextField(
+                                  value: cartItem.discount,
+                                  hintText: 'Enter discount',
+                                  onChanged: (value) {
+                                    final discount = value;
+                                    cartItemController.updateDiscount(
+                                        cartItem.product, discount);
+                                  },
                                 ),
-                                const SizedBox(width: 8),
-                                // Quantity
-                                Expanded(
-                                  flex: 1,
-                                  child: Text(
-                                    '${cartItem.quantity}',
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(color: Colors.grey),
-                                  ),
+                              ),
+                              const SizedBox(width: 8),
+                              // Quantity
+                              Expanded(
+                                flex: 1,
+                                child: Text(
+                                  '${cartItem.quantity}',
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(color: Colors.grey),
                                 ),
-                                const SizedBox(width: 8),
-                                // Total Price
-                                Expanded(
-                                  flex: 2,
-                                  child: Text(
-                                    '\$${cartItem.totalPrice.toStringAsFixed(2)}',
-                                    textAlign: TextAlign.right,
-                                    style: const TextStyle(fontSize: 16),
-                                  ),
+                              ),
+                              const SizedBox(width: 8),
+                              // Total Price
+                              Expanded(
+                                flex: 2,
+                                child: Text(
+                                  '\$${cartItem.subPrice.toStringAsFixed(2)}',
+                                  textAlign: TextAlign.right,
+                                  style: const TextStyle(fontSize: 16),
                                 ),
-                              ],
-                            ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.more_vert),
+                                onPressed: () {
+                                  cartItemController.openActionDrawer(
+                                      context, cartItem, cartItemController);
+                                },
+                              ),
+                            ],
                           ),
                         );
                       },
                     ),
                   ),
+
                   // Discount Field
 
                   const SizedBox(height: 16),
@@ -286,6 +275,21 @@ class ShowProduct extends StatelessWidget {
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PaymentScreen(
+                            cartItems: cartItemController
+                                .cartItems, // List of CartItem
+                            transactionRepo: TransactionRepo(),
+                          ),
+                        ),
+                      );
+                    },
+                    child: const Text('Buy Now'),
                   ),
                 ],
               ),

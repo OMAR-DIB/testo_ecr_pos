@@ -11,12 +11,13 @@ class CartItemController extends ChangeNotifier {
 
   List<CartItem> get cartItems => List.unmodifiable(_cartItems);
 
+
   double get totalPrice {
-    final subtotal = _cartItems.fold(
+    final total = _cartItems.fold(
       0.0,
-      (sum, item) => sum + item.totalPrice,
+      (sum, item) => sum + item.subPrice,
     );
-    return subtotal;
+    return total;
   }
 
   void dismissProduct(Product product) {
@@ -26,7 +27,7 @@ class CartItemController extends ChangeNotifier {
       notifyListeners();
     }
   }
-  
+
   void addProduct(Product product) {
     final index = _cartItems.indexWhere((item) => item.product.id == product.id);
     if (index != -1) {
@@ -61,4 +62,38 @@ class CartItemController extends ChangeNotifier {
       notifyListeners();
     }
   }
+  void openActionDrawer(
+    BuildContext context, CartItem cartItem, CartItemController cartItemController) {
+  showModalBottomSheet(
+    context: context,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ),
+    builder: (context) => Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.delete, color: Colors.red),
+            title: const Text('Delete Row'),
+            onTap: () {
+              cartItemController.removeProduct(cartItem.product);
+              Navigator.pop(context); // Close the drawer
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.edit),
+            title: const Text('Edit Discount'),
+            onTap: () {
+              // Example: Add edit functionality
+              Navigator.pop(context); // Close the drawer
+            },
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
 }
