@@ -1,4 +1,5 @@
 import 'package:objectbox/objectbox.dart';
+
 @Entity()
 class Product {
   @Id()
@@ -13,12 +14,16 @@ class Product {
   /// Price of the product
   double price;
 
+  /// TVA (Value Added Tax) percentage
+  double tva;
+
   /// Time the product was created
   DateTime createdAt;
 
   Product({
     required this.name,
     required this.price,
+    required this.tva,
     this.description,
   }) : createdAt = DateTime.now();
 
@@ -34,3 +39,4 @@ class Product {
     return other.id == id;
   }
 }
+

@@ -1,6 +1,5 @@
 import 'package:testooo/main.dart';
 import 'package:testooo/models/payment/payment.dart';
-
 class PaymentRepo {
   final paymentBox = gloablObx.store.box<Payment>();
 
@@ -9,12 +8,12 @@ class PaymentRepo {
   // Create a new payment
   Payment createPayment({
     required double amount, 
-    required String paymentMethod,
+    required String paymentType,
     bool isConfirmed = false,
   }) {
     return Payment(
       amount: amount, 
-      paymentMethod: paymentMethod, 
+      paymentType: paymentType, 
       isConfirmed: isConfirmed
     );
   }
@@ -47,16 +46,6 @@ class PaymentRepo {
   List<Payment> getAllPayments() {
     return paymentBox.getAll();
   }
-
-  // Get unconfirmed payments
-  // List<Payment> getUnconfirmedPayments() {
-  //   return paymentBox.query(Payment_.isConfirmed.equals(false)).build().find();
-  // }
-
-  // // Get payments by method
-  // List<Payment> getPaymentsByMethod(String paymentMethod) {
-  //   return paymentBox.query(Payment_.paymentMethod.equals(paymentMethod)).build().find();
-  // }
 
   // Calculate total payment amount
   double calculateTotalPaymentAmount() {

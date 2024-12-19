@@ -6,9 +6,13 @@ import 'package:testooo/models/transaction/transaction.dart';
 class TransactionLine {
   @Id()
   int id = 0;
+
   String itemName;
   int quantity;
   double price;
+
+  // Optional: Link back to Transaction
+  final ToOne<Transaction> transaction = ToOne<Transaction>();
 
   TransactionLine({
     required this.itemName,

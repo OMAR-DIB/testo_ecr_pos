@@ -31,9 +31,12 @@ class ProductScreen extends StatelessWidget {
           final TextEditingController descriptionController =
               TextEditingController();
           final TextEditingController priceController = TextEditingController();
-
+          final TextEditingController tvaController =
+              TextEditingController();
           return Scaffold(
             appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 31, 110, 54), // AppBar background color
+              
               title: const Text('Add Product'),
               actions: [
                 Consumer<ProductProvider>(
@@ -54,7 +57,7 @@ class ProductScreen extends StatelessWidget {
                           ),
                         );
                       },
-                      icon: const Icon(Icons.show_chart),
+                      icon: const Icon(Icons.show_chart,color: Colors.white,),
                     );
                   },
                 ),
@@ -115,6 +118,17 @@ class ProductScreen extends StatelessWidget {
                           ),
                           keyboardType: TextInputType.number,
                         ),
+                        const SizedBox(height: 16),
+                        TextField(
+                          controller: tvaController,
+                          decoration: InputDecoration(
+                            labelText: 'tva',
+                            prefixIcon: const Icon(Icons.shopping_bag),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
                         const SizedBox(height: 24),
                         Center(
                           child: ElevatedButton.icon(
@@ -122,13 +136,16 @@ class ProductScreen extends StatelessWidget {
                               String product = productController.text;
                               String description = descriptionController.text;
                               String priceText = priceController.text;
+                              String tvaText = tvaController.text;
 
                               if (product.isNotEmpty && priceText.isNotEmpty) {
                                 double price = double.tryParse(priceText) ?? 0;
+                                double tva = double.tryParse(tvaText) ?? 0;
                                 Product newProduct = Product(
                                   name: product,
                                   description: description,
                                   price: price,
+                                  tva: tva,
                                 );
                                 Provider.of<ProductProvider>(context,
                                         listen: false)

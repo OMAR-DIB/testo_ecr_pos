@@ -1,18 +1,18 @@
 import 'package:objectbox/objectbox.dart';
 import 'package:testooo/models/transaction/transaction.dart';
 
-
-@Entity()
+@Entity( )
 class Payment {
   @Id()
   int id = 0;
-  double amount;
-  String paymentMethod;
+  String paymentType; // e.g., 'cash', 'card'
+  double amount;      // Amount paid
   bool isConfirmed;
 
   Payment({
+    required this.paymentType,
     required this.amount,
-    required this.paymentMethod,
     this.isConfirmed = false,
   });
 }
+

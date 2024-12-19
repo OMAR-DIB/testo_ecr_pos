@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "1:3903664865755418506",
-      "lastPropertyId": "5:7878826235364207706",
+      "lastPropertyId": "6:854208606137805738",
       "name": "Product",
       "properties": [
         {
@@ -33,6 +33,11 @@
           "id": "5:7878826235364207706",
           "name": "createdAt",
           "type": 10
+        },
+        {
+          "id": "6:854208606137805738",
+          "name": "tva",
+          "type": 8
         }
       ],
       "relations": []
@@ -64,12 +69,17 @@
           "id": "1:19893120617664781",
           "name": "lines",
           "targetId": "3:2735234876302347974"
+        },
+        {
+          "id": "2:655632831297276494",
+          "name": "payments",
+          "targetId": "5:319029168594019471"
         }
       ]
     },
     {
       "id": "3:2735234876302347974",
-      "lastPropertyId": "4:8520938700662906179",
+      "lastPropertyId": "5:5062604618596839203",
       "name": "TransactionLine",
       "properties": [
         {
@@ -92,6 +102,14 @@
           "id": "4:8520938700662906179",
           "name": "price",
           "type": 8
+        },
+        {
+          "id": "5:5062604618596839203",
+          "name": "transactionId",
+          "type": 11,
+          "flags": 520,
+          "indexId": "1:3998555411153740361",
+          "relationTarget": "Transaction"
         }
       ],
       "relations": []
@@ -124,17 +142,48 @@
         }
       ],
       "relations": []
+    },
+    {
+      "id": "5:319029168594019471",
+      "lastPropertyId": "5:6736115838862733555",
+      "name": "Payment",
+      "properties": [
+        {
+          "id": "1:5094017078609044205",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:7840034826170748240",
+          "name": "amount",
+          "type": 8
+        },
+        {
+          "id": "4:8697986981020823173",
+          "name": "isConfirmed",
+          "type": 1
+        },
+        {
+          "id": "5:6736115838862733555",
+          "name": "paymentType",
+          "type": 9
+        }
+      ],
+      "relations": []
     }
   ],
-  "lastEntityId": "4:4652221415375332005",
-  "lastIndexId": "0:0",
-  "lastRelationId": "1:19893120617664781",
+  "lastEntityId": "5:319029168594019471",
+  "lastIndexId": "1:3998555411153740361",
+  "lastRelationId": "2:655632831297276494",
   "lastSequenceId": "0:0",
   "modelVersion": 5,
   "modelVersionParserMinimum": 5,
   "retiredEntityUids": [],
   "retiredIndexUids": [],
-  "retiredPropertyUids": [],
+  "retiredPropertyUids": [
+    1719804027107459503
+  ],
   "retiredRelationUids": [],
   "version": 1
 }

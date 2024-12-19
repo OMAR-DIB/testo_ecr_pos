@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:testooo/models/product.dart';
 import 'package:testooo/models/transaction/transaction.dart';
 import 'package:testooo/models/transaction/transaction_line.dart';
@@ -14,8 +15,14 @@ class CartItem {
     double discountedPrice = price * (1 - (discount / 100));
     return discountedPrice;
   }
-
+  double get gettva{
+    return product.tva;
+  }
   
-
+  double get subPriceAfterTva {
+    double price = product.price * quantity;
+    double discountedPrice = price * (1 + gettva / 100);
+    return discountedPrice;
+  }
 
 }

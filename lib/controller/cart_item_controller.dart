@@ -5,12 +5,10 @@ import 'package:testooo/main.dart';
 import 'package:testooo/models/product.dart';
 import 'package:testooo/repo/product_repo.dart';
 
-
 class CartItemController extends ChangeNotifier {
   final List<CartItem> _cartItems = [];
 
   List<CartItem> get cartItems => List.unmodifiable(_cartItems);
-
 
   double get totalPrice {
     final total = _cartItems.fold(
@@ -20,8 +18,17 @@ class CartItemController extends ChangeNotifier {
     return total;
   }
 
+  double get totalPriceafterTva {
+    final total = _cartItems.fold(
+      0.0,
+      (sum, item) => sum + (totalPrice * (1 + item.gettva / 100)),
+    );
+    return total;
+  }
+
   void dismissProduct(Product product) {
-    final index = _cartItems.indexWhere((item) => item.product.id == product.id);
+    final index =
+        _cartItems.indexWhere((item) => item.product.id == product.id);
     if (index != -1) {
       _cartItems.removeAt(index);
       notifyListeners();
@@ -29,7 +36,8 @@ class CartItemController extends ChangeNotifier {
   }
 
   void addProduct(Product product) {
-    final index = _cartItems.indexWhere((item) => item.product.id == product.id);
+    final index =
+        _cartItems.indexWhere((item) => item.product.id == product.id);
     if (index != -1) {
       _cartItems[index].quantity++;
     } else {
@@ -39,7 +47,8 @@ class CartItemController extends ChangeNotifier {
   }
 
   void removeProduct(Product product) {
-    final index = _cartItems.indexWhere((item) => item.product.id == product.id);
+    final index =
+        _cartItems.indexWhere((item) => item.product.id == product.id);
     if (index != -1) {
       if (_cartItems[index].quantity > 1) {
         _cartItems[index].quantity--;
@@ -56,44 +65,45 @@ class CartItemController extends ChangeNotifier {
   }
 
   void updateDiscount(Product product, double discount) {
-    final index = _cartItems.indexWhere((item) => item.product.id == product.id);
+    final index =
+        _cartItems.indexWhere((item) => item.product.id == product.id);
     if (index != -1) {
       _cartItems[index].discount = discount;
       notifyListeners();
     }
   }
-  void openActionDrawer(
-    BuildContext context, CartItem cartItem, CartItemController cartItemController) {
-  showModalBottomSheet(
-    context: context,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-    ),
-    builder: (context) => Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ListTile(
-            leading: const Icon(Icons.delete, color: Colors.red),
-            title: const Text('Delete Row'),
-            onTap: () {
-              cartItemController.removeProduct(cartItem.product);
-              Navigator.pop(context); // Close the drawer
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.edit),
-            title: const Text('Edit Discount'),
-            onTap: () {
-              // Example: Add edit functionality
-              Navigator.pop(context); // Close the drawer
-            },
-          ),
-        ],
-      ),
-    ),
-  );
-}
 
+  void openActionDrawer(BuildContext context, CartItem cartItem,
+      CartItemController cartItemController) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.delete, color: Colors.red),
+              title: const Text('Delete Row'),
+              onTap: () {
+                cartItemController.removeProduct(cartItem.product);
+                Navigator.pop(context); // Close the drawer
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.edit),
+              title: const Text('Edit Discount'),
+              onTap: () {
+                // Example: Add edit functionality
+                Navigator.pop(context); // Close the drawer
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

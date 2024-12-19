@@ -14,6 +14,7 @@ import 'package:objectbox/internal.dart'
 import 'package:objectbox/objectbox.dart' as obx;
 import 'package:objectbox_flutter_libs/objectbox_flutter_libs.dart';
 
+import 'models/payment/payment.dart';
 import 'models/product.dart';
 import 'models/transaction/transaction.dart';
 import 'models/transaction/transaction_line.dart';
@@ -25,7 +26,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
       id: const obx_int.IdUid(1, 3903664865755418506),
       name: 'Product',
-      lastPropertyId: const obx_int.IdUid(5, 7878826235364207706),
+      lastPropertyId: const obx_int.IdUid(6, 854208606137805738),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
@@ -52,6 +53,11 @@ final _entities = <obx_int.ModelEntity>[
             id: const obx_int.IdUid(5, 7878826235364207706),
             name: 'createdAt',
             type: 10,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(6, 854208606137805738),
+            name: 'tva',
+            type: 8,
             flags: 0)
       ],
       relations: <obx_int.ModelRelation>[],
@@ -82,13 +88,17 @@ final _entities = <obx_int.ModelEntity>[
         obx_int.ModelRelation(
             id: const obx_int.IdUid(1, 19893120617664781),
             name: 'lines',
-            targetId: const obx_int.IdUid(3, 2735234876302347974))
+            targetId: const obx_int.IdUid(3, 2735234876302347974)),
+        obx_int.ModelRelation(
+            id: const obx_int.IdUid(2, 655632831297276494),
+            name: 'payments',
+            targetId: const obx_int.IdUid(5, 319029168594019471))
       ],
       backlinks: <obx_int.ModelBacklink>[]),
   obx_int.ModelEntity(
       id: const obx_int.IdUid(3, 2735234876302347974),
       name: 'TransactionLine',
-      lastPropertyId: const obx_int.IdUid(4, 8520938700662906179),
+      lastPropertyId: const obx_int.IdUid(5, 5062604618596839203),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
@@ -110,7 +120,14 @@ final _entities = <obx_int.ModelEntity>[
             id: const obx_int.IdUid(4, 8520938700662906179),
             name: 'price',
             type: 8,
-            flags: 0)
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(5, 5062604618596839203),
+            name: 'transactionId',
+            type: 11,
+            flags: 520,
+            indexId: const obx_int.IdUid(1, 3998555411153740361),
+            relationTarget: 'Transaction')
       ],
       relations: <obx_int.ModelRelation>[],
       backlinks: <obx_int.ModelBacklink>[]),
@@ -138,6 +155,35 @@ final _entities = <obx_int.ModelEntity>[
         obx_int.ModelProperty(
             id: const obx_int.IdUid(4, 978387410737348747),
             name: 'role',
+            type: 9,
+            flags: 0)
+      ],
+      relations: <obx_int.ModelRelation>[],
+      backlinks: <obx_int.ModelBacklink>[]),
+  obx_int.ModelEntity(
+      id: const obx_int.IdUid(5, 319029168594019471),
+      name: 'Payment',
+      lastPropertyId: const obx_int.IdUid(5, 6736115838862733555),
+      flags: 0,
+      properties: <obx_int.ModelProperty>[
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(1, 5094017078609044205),
+            name: 'id',
+            type: 6,
+            flags: 1),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(2, 7840034826170748240),
+            name: 'amount',
+            type: 8,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(4, 8697986981020823173),
+            name: 'isConfirmed',
+            type: 1,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(5, 6736115838862733555),
+            name: 'paymentType',
             type: 9,
             flags: 0)
       ],
@@ -180,13 +226,13 @@ Future<obx.Store> openStore(
 obx_int.ModelDefinition getObjectBoxModel() {
   final model = obx_int.ModelInfo(
       entities: _entities,
-      lastEntityId: const obx_int.IdUid(4, 4652221415375332005),
-      lastIndexId: const obx_int.IdUid(0, 0),
-      lastRelationId: const obx_int.IdUid(1, 19893120617664781),
+      lastEntityId: const obx_int.IdUid(5, 319029168594019471),
+      lastIndexId: const obx_int.IdUid(1, 3998555411153740361),
+      lastRelationId: const obx_int.IdUid(2, 655632831297276494),
       lastSequenceId: const obx_int.IdUid(0, 0),
       retiredEntityUids: const [],
       retiredIndexUids: const [],
-      retiredPropertyUids: const [],
+      retiredPropertyUids: const [1719804027107459503],
       retiredRelationUids: const [],
       modelVersion: 5,
       modelVersionParserMinimum: 5,
@@ -206,12 +252,13 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final descriptionOffset = object.description == null
               ? null
               : fbb.writeString(object.description!);
-          fbb.startTable(6);
+          fbb.startTable(7);
           fbb.addInt64(0, object.id);
           fbb.addOffset(1, nameOffset);
           fbb.addOffset(2, descriptionOffset);
           fbb.addFloat64(3, object.price);
           fbb.addInt64(4, object.createdAt.millisecondsSinceEpoch);
+          fbb.addFloat64(5, object.tva);
           fbb.finish(fbb.endTable());
           return object.id;
         },
@@ -222,11 +269,16 @@ obx_int.ModelDefinition getObjectBoxModel() {
               .vTableGet(buffer, rootOffset, 6, '');
           final priceParam =
               const fb.Float64Reader().vTableGet(buffer, rootOffset, 10, 0);
+          final tvaParam =
+              const fb.Float64Reader().vTableGet(buffer, rootOffset, 14, 0);
           final descriptionParam =
               const fb.StringReader(asciiOptimization: true)
                   .vTableGetNullable(buffer, rootOffset, 8);
           final object = Product(
-              name: nameParam, price: priceParam, description: descriptionParam)
+              name: nameParam,
+              price: priceParam,
+              tva: tvaParam,
+              description: descriptionParam)
             ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0)
             ..createdAt = DateTime.fromMillisecondsSinceEpoch(
                 const fb.Int64Reader().vTableGet(buffer, rootOffset, 12, 0));
@@ -236,8 +288,10 @@ obx_int.ModelDefinition getObjectBoxModel() {
     Transaction: obx_int.EntityDefinition<Transaction>(
         model: _entities[1],
         toOneRelations: (Transaction object) => [],
-        toManyRelations: (Transaction object) =>
-            {obx_int.RelInfo<Transaction>.toMany(1, object.id): object.lines},
+        toManyRelations: (Transaction object) => {
+              obx_int.RelInfo<Transaction>.toMany(1, object.id): object.lines,
+              obx_int.RelInfo<Transaction>.toMany(2, object.id): object.payments
+            },
         getId: (Transaction object) => object.id,
         setId: (Transaction object, int id) {
           object.id = id;
@@ -257,19 +311,19 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final transactionDateParam =
               const fb.StringReader(asciiOptimization: true)
                   .vTableGet(buffer, rootOffset, 6, '');
-          final isPaymentConfirmedParam =
-              const fb.BoolReader().vTableGet(buffer, rootOffset, 8, false);
-          final object = Transaction(
-              transactionDate: transactionDateParam,
-              isPaymentConfirmed: isPaymentConfirmedParam)
-            ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
+          final object = Transaction(transactionDate: transactionDateParam)
+            ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0)
+            ..isPaymentConfirmed =
+                const fb.BoolReader().vTableGet(buffer, rootOffset, 8, false);
           obx_int.InternalToManyAccess.setRelInfo<Transaction>(object.lines,
               store, obx_int.RelInfo<Transaction>.toMany(1, object.id));
+          obx_int.InternalToManyAccess.setRelInfo<Transaction>(object.payments,
+              store, obx_int.RelInfo<Transaction>.toMany(2, object.id));
           return object;
         }),
     TransactionLine: obx_int.EntityDefinition<TransactionLine>(
         model: _entities[2],
-        toOneRelations: (TransactionLine object) => [],
+        toOneRelations: (TransactionLine object) => [object.transaction],
         toManyRelations: (TransactionLine object) => {},
         getId: (TransactionLine object) => object.id,
         setId: (TransactionLine object, int id) {
@@ -277,11 +331,12 @@ obx_int.ModelDefinition getObjectBoxModel() {
         },
         objectToFB: (TransactionLine object, fb.Builder fbb) {
           final itemNameOffset = fbb.writeString(object.itemName);
-          fbb.startTable(5);
+          fbb.startTable(6);
           fbb.addInt64(0, object.id);
           fbb.addOffset(1, itemNameOffset);
           fbb.addInt64(2, object.quantity);
           fbb.addFloat64(3, object.price);
+          fbb.addInt64(4, object.transaction.targetId);
           fbb.finish(fbb.endTable());
           return object.id;
         },
@@ -299,7 +354,9 @@ obx_int.ModelDefinition getObjectBoxModel() {
               quantity: quantityParam,
               price: priceParam)
             ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
-
+          object.transaction.targetId =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 12, 0);
+          object.transaction.attach(store);
           return object;
         }),
     User: obx_int.EntityDefinition<User>(
@@ -340,6 +397,42 @@ obx_int.ModelDefinition getObjectBoxModel() {
               role: roleParam);
 
           return object;
+        }),
+    Payment: obx_int.EntityDefinition<Payment>(
+        model: _entities[4],
+        toOneRelations: (Payment object) => [],
+        toManyRelations: (Payment object) => {},
+        getId: (Payment object) => object.id,
+        setId: (Payment object, int id) {
+          object.id = id;
+        },
+        objectToFB: (Payment object, fb.Builder fbb) {
+          final paymentTypeOffset = fbb.writeString(object.paymentType);
+          fbb.startTable(6);
+          fbb.addInt64(0, object.id);
+          fbb.addFloat64(1, object.amount);
+          fbb.addBool(3, object.isConfirmed);
+          fbb.addOffset(4, paymentTypeOffset);
+          fbb.finish(fbb.endTable());
+          return object.id;
+        },
+        objectFromFB: (obx.Store store, ByteData fbData) {
+          final buffer = fb.BufferContext(fbData);
+          final rootOffset = buffer.derefObject(0);
+          final paymentTypeParam =
+              const fb.StringReader(asciiOptimization: true)
+                  .vTableGet(buffer, rootOffset, 12, '');
+          final amountParam =
+              const fb.Float64Reader().vTableGet(buffer, rootOffset, 6, 0);
+          final isConfirmedParam =
+              const fb.BoolReader().vTableGet(buffer, rootOffset, 10, false);
+          final object = Payment(
+              paymentType: paymentTypeParam,
+              amount: amountParam,
+              isConfirmed: isConfirmedParam)
+            ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
+
+          return object;
         })
   };
 
@@ -367,6 +460,10 @@ class Product_ {
   /// See [Product.createdAt].
   static final createdAt =
       obx.QueryDateProperty<Product>(_entities[0].properties[4]);
+
+  /// See [Product.tva].
+  static final tva =
+      obx.QueryDoubleProperty<Product>(_entities[0].properties[5]);
 }
 
 /// [Transaction] entity fields to define ObjectBox queries.
@@ -386,6 +483,10 @@ class Transaction_ {
   /// see [Transaction.lines]
   static final lines = obx.QueryRelationToMany<Transaction, TransactionLine>(
       _entities[1].relations[0]);
+
+  /// see [Transaction.payments]
+  static final payments =
+      obx.QueryRelationToMany<Transaction, Payment>(_entities[1].relations[1]);
 }
 
 /// [TransactionLine] entity fields to define ObjectBox queries.
@@ -405,6 +506,11 @@ class TransactionLine_ {
   /// See [TransactionLine.price].
   static final price =
       obx.QueryDoubleProperty<TransactionLine>(_entities[2].properties[3]);
+
+  /// See [TransactionLine.transaction].
+  static final transaction =
+      obx.QueryRelationToOne<TransactionLine, Transaction>(
+          _entities[2].properties[4]);
 }
 
 /// [User] entity fields to define ObjectBox queries.
@@ -422,4 +528,23 @@ class User_ {
 
   /// See [User.role].
   static final role = obx.QueryStringProperty<User>(_entities[3].properties[3]);
+}
+
+/// [Payment] entity fields to define ObjectBox queries.
+class Payment_ {
+  /// See [Payment.id].
+  static final id =
+      obx.QueryIntegerProperty<Payment>(_entities[4].properties[0]);
+
+  /// See [Payment.amount].
+  static final amount =
+      obx.QueryDoubleProperty<Payment>(_entities[4].properties[1]);
+
+  /// See [Payment.isConfirmed].
+  static final isConfirmed =
+      obx.QueryBooleanProperty<Payment>(_entities[4].properties[2]);
+
+  /// See [Payment.paymentType].
+  static final paymentType =
+      obx.QueryStringProperty<Payment>(_entities[4].properties[3]);
 }

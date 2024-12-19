@@ -5,54 +5,76 @@ import 'package:testooo/models/cart_item.dart';
 import 'package:testooo/models/payment/payment.dart';
 import 'package:testooo/models/transaction/transaction_repo.dart';
 import 'package:testooo/models/transaction/transaction.dart';
-class PaymentScreen extends StatefulWidget {
+import 'package:testooo/models/transaction/transaction_service.dart';class PaymentScreen extends StatefulWidget {
   final List<CartItem> cartItems;
-  final TransactionRepo transactionRepo;
+  final TransactionService transactionService;
 
   const PaymentScreen({
     super.key,
     required this.cartItems,
-    required this.transactionRepo,
+    required this.transactionService,
   });
 
   @override
-  _PaymentScreenState createState() => _PaymentScreenState();
+  State<PaymentScreen> createState() => _PaymentScreenState();
 }
 
 class _PaymentScreenState extends State<PaymentScreen> {
-  String paymentMethod = 'Cash'; // Default payment method
-  late Transaction transaction;
+  late double totalAmount;
+  String selectedPaymentType = 'Cash';
+  final TextEditingController _amountController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    transaction =
-        widget.transactionRepo.createTransactionFromCartItems(widget.cartItems);
+    widget.transactionService.initializeTransaction(widget.cartItems);
+    totalAmount = widget.transactionService.calculateTotal(widget.cartItems);
   }
 
-  double _calculateTotal() {
-    return widget.cartItems.fold(
-        0.0, (sum, item) => sum + item.subPrice);
-  }
-
-  void _onConfirmPayment() {
-    // Save the transaction
-    final transactionId = widget.transactionRepo.saveTransaction(transaction);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Transaction saved successfully!')),
+  void _addPayment() {
+    final amount = double.tryParse(_amountController.text) ?? 0.0;
+    String error = widget.transactionService.addPayment(
+      amount,
+      selectedPaymentType,
+      totalAmount,
     );
 
-    Navigator.pop(context); // Go back
+    if (error.isNotEmpty) {
+      _showError(error);
+    } else {
+      setState(() => _amountController.clear());
+    }
+  }
+
+  void _confirmPayment() {
+    String error = widget.transactionService.confirmTransaction();
+
+    if (error.isNotEmpty) {
+      _showError(error);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Payment confirmed! Transaction saved.')),
+      );
+      Navigator.pop(context); // Return to previous screen
+    }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final remainingAmount = widget.transactionService
+        .calculateRemainingAmount(totalAmount);
+
     return Scaffold(
       appBar: AppBar(title: const Text('Payment')),
       body: Column(
         children: [
-          // Display cart items
+          // Cart Item List
           Expanded(
             child: ListView.builder(
               itemCount: widget.cartItems.length,
@@ -67,32 +89,76 @@ class _PaymentScreenState extends State<PaymentScreen> {
             ),
           ),
           const Divider(),
-          // Payment method selector
-          ListTile(
-            title: const Text('Payment Method'),
-            trailing: DropdownButton<String>(
-              value: paymentMethod,
-              onChanged: (value) {
-                setState(() {
-                  paymentMethod = value!;
-                });
-              },
-              items: const [
-                DropdownMenuItem(value: 'Cash', child: Text('Cash')),
-                DropdownMenuItem(value: 'Card', child: Text('Card')),
+
+          // Payment Input Section
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: DropdownButton<String>(
+                    value: selectedPaymentType,
+                    onChanged: (value) {
+                      setState(() => selectedPaymentType = value!);
+                    },
+                    items: const [
+                      DropdownMenuItem(value: 'Cash', child: Text('Cash')),
+                      DropdownMenuItem(value: 'Card', child: Text('Card')),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  flex: 3,
+                  child: TextField(
+                    controller: _amountController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'Enter Amount',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                ElevatedButton(
+                  onPressed: _addPayment,
+                  child: const Text('Add'),
+                ),
               ],
             ),
           ),
-          // Total price
-          ListTile(
-            title: const Text('Total'),
-            trailing: Text('\$${_calculateTotal().toStringAsFixed(2)}'),
+          const Divider(),
+
+          // Payments List
+          Expanded(
+            child: ListView.builder(
+              itemCount: widget.transactionService.payments.length,
+              itemBuilder: (context, index) {
+                final payment = widget.transactionService.payments[index];
+                return ListTile(
+                  leading: Icon(payment.paymentType == 'Cash'
+                      ? Icons.money
+                      : Icons.credit_card),
+                  title: Text(payment.paymentType),
+                  trailing: Text('\$${payment.amount.toStringAsFixed(2)}'),
+                );
+              },
+            ),
           ),
-          // Confirm Payment Button
+
+          // Remaining and Confirm Button
+          ListTile(
+            title: const Text('Remaining Amount'),
+            trailing: Text(
+              '\$${remainingAmount.toStringAsFixed(2)}',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton(
-              onPressed: _onConfirmPayment,
+              onPressed: _confirmPayment,
               child: const Text('Confirm Payment'),
             ),
           ),
