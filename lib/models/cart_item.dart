@@ -16,13 +16,17 @@ class CartItem {
     return discountedPrice;
   }
   double get gettva{
-    return product.tva;
+    return (product.price / product.tva);
   }
-  
-  double get subPriceAfterTva {
-    double price = product.price * quantity;
-    double discountedPrice = price * (1 + gettva / 100);
-    return discountedPrice;
-  }
+
+
+double get subPriceAfterTva {
+  double basePrice = (product.price ) * quantity; // Calculate base price
+  double discountedPrice = basePrice * (1 - discount / 100); // Apply discount
+  double priceAfterTva = discountedPrice + gettva ; // Apply TVA
+  return priceAfterTva;
+}
+
+
 
 }

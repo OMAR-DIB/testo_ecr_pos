@@ -13,18 +13,23 @@ class CartItemController extends ChangeNotifier {
   double get totalPrice {
     final total = _cartItems.fold(
       0.0,
-      (sum, item) => sum + item.subPrice,
+      (sum, item) => sum + item.subPriceAfterTva,
     );
-    return total;
+    return total;                                 
   }
 
-  double get totalPriceafterTva {
-    final total = _cartItems.fold(
-      0.0,
-      (sum, item) => sum + (totalPrice * (1 + item.gettva / 100)),
-    );
-    return total;
-  }
+  // double get totalPriceafterTva {
+  //   final total = _cartItems.fold(
+  //     0.0,
+  //     (sum, item) => sum + (totalPrice + item.gettva));
+  //   return total;
+  // }
+//   double get subPriceAfterTva {
+//   double basePrice = (product.price ) * quantity; // Calculate base price
+//   double discountedPrice = basePrice * (1 - discount / 100); // Apply discount
+//   double priceAfterTva = discountedPrice + gettva ; // Apply TVA
+//   return priceAfterTva;
+// }
 
   void dismissProduct(Product product) {
     final index =

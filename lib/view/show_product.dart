@@ -153,7 +153,7 @@ class ShowProduct extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).primaryColor,
+                      color: const Color.fromARGB(255, 31, 110, 54),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -279,7 +279,7 @@ class ShowProduct extends StatelessWidget {
                   const SizedBox(height: 16),
                   // Updated Total Price
                   Text(
-                    'Total: \$${cartItemController.totalPriceafterTva.toStringAsFixed(2)}',
+                    'Total: \$${cartItemController.totalPrice.toStringAsFixed(2)}',
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,

@@ -38,19 +38,35 @@ class TransactionService {
 
   // Add Payment to the List
   String addPayment(double amount, String paymentType, double totalAmount) {
-    double remainingAmount = calculateRemainingAmount(totalAmount);
+  if (amount <= 0) return 'Amount must be greater than 0';
 
-    if (amount <= 0) return 'Please enter a valid amount.';
-    if (amount > remainingAmount) return 'Amount exceeds the remaining balance.';
+  // Check if the payment type already exists
+  final existingPaymentIndex =
+      payments.indexWhere((payment) => payment.paymentType == paymentType);
 
-    // Create payment and add it to the list
-    _payments.add(Payment(
-      amount: amount,
-      paymentType: paymentType,
-      isConfirmed: false,
-    ));
-    return ''; // No errors
+  if (existingPaymentIndex != -1) {
+    // Update the existing payment's amount
+    payments[existingPaymentIndex].amount += amount;
+  } else {
+    // Add a new payment if it doesn't exist
+    payments.add(Payment(paymentType: paymentType, amount: amount));
   }
+
+  // Calculate total paid so far
+  final totalPaid = payments.fold(0.0, (sum, payment) => sum + payment.amount);
+  if (totalPaid > totalAmount) {
+    // Rollback the addition if it exceeds totalAmount
+    if (existingPaymentIndex != -1) {
+      payments[existingPaymentIndex].amount -= amount;
+    } else {
+      payments.removeLast();
+    }
+    return 'Total payment exceeds the required amount';
+  }
+
+  return ''; // Return no error if successful
+}
+
 
   // Save Transaction with Payments
   int saveTransactionWithPayments() {

@@ -6,6 +6,7 @@ import 'package:testooo/models/product.dart';
 import 'package:provider/provider.dart';
 import 'package:testooo/models/transaction/transaction_repo.dart';
 import 'package:testooo/repo/product_repo.dart';
+import 'package:testooo/view/report_page.dart';
 import 'package:testooo/view/show_product.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -31,14 +32,23 @@ class ProductScreen extends StatelessWidget {
           final TextEditingController descriptionController =
               TextEditingController();
           final TextEditingController priceController = TextEditingController();
-          final TextEditingController tvaController =
-              TextEditingController();
+          final TextEditingController tvaController = TextEditingController();
           return Scaffold(
             appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 31, 110, 54), // AppBar background color
-              
+              backgroundColor: const Color.fromARGB(
+                  255, 31, 110, 54), // AppBar background color
+
               title: const Text('Add Product'),
               actions: [
+                IconButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => ReportPage(),),
+                    );
+                  },
+                  icon: const Icon(Icons.data_thresholding),
+                  color: Colors.white,
+                ),
                 Consumer<ProductProvider>(
                   builder: (context, provider, child) {
                     return IconButton(
@@ -57,7 +67,10 @@ class ProductScreen extends StatelessWidget {
                           ),
                         );
                       },
-                      icon: const Icon(Icons.show_chart,color: Colors.white,),
+                      icon: const Icon(
+                        Icons.show_chart,
+                        color: Colors.white,
+                      ),
                     );
                   },
                 ),
@@ -92,6 +105,14 @@ class ProductScreen extends StatelessWidget {
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(
+                                color:
+                                    Colors.green, // Set your desired color here
+                                width: 2.0, // Thickness of the border
+                              ),
+                            ),
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -102,6 +123,14 @@ class ProductScreen extends StatelessWidget {
                             prefixIcon: const Icon(Icons.description),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(
+                                color:
+                                    Colors.green, // Set your desired color here
+                                width: 2.0, // Thickness of the border
+                              ),
                             ),
                           ),
                           maxLines: 2,
@@ -115,6 +144,14 @@ class ProductScreen extends StatelessWidget {
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(
+                                color:
+                                    Colors.green, // Set your desired color here
+                                width: 2.0, // Thickness of the border
+                              ),
+                            ),
                           ),
                           keyboardType: TextInputType.number,
                         ),
@@ -124,6 +161,14 @@ class ProductScreen extends StatelessWidget {
                           decoration: InputDecoration(
                             labelText: 'tva',
                             prefixIcon: const Icon(Icons.shopping_bag),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(
+                                color:
+                                    Colors.green, // Set your desired color here
+                                width: 2.0, // Thickness of the border
+                              ),
+                            ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
@@ -159,6 +204,7 @@ class ProductScreen extends StatelessWidget {
                                 productController.clear();
                                 descriptionController.clear();
                                 priceController.clear();
+                                tvaController.clear();
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
@@ -169,16 +215,20 @@ class ProductScreen extends StatelessWidget {
                                 );
                               }
                             },
-                            icon: const Icon(Icons.save,
-                                size: 18), // Smaller icon size
+                            icon: const Icon(
+                              Icons.save,
+                              size: 18,
+                              color: Colors.black,
+                            ), // Smaller icon size
                             label: const Text(
                               'Save',
-                              style:
-                                  TextStyle(fontSize: 12), // Smaller font size
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.black), // Smaller font size
                             ),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  Colors.grey[300], // Custom color
+                              backgroundColor: const Color.fromARGB(
+                                  255, 31, 110, 54), // Custom color
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 12, // Adjusted horizontal padding
                                 vertical: 8, // Adjusted vertical padding
