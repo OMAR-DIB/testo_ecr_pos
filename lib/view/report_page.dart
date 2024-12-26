@@ -45,11 +45,24 @@ class _ReportPageState extends State<ReportPage> {
     final end = DateFormat('yyyy-MM-dd').format(endDate!);
 
     setState(() {
-      filteredTransactions = transactionBox.query(
-        Transaction_.transactionDate.greaterOrEqual(start).and(
-          Transaction_.transactionDate.lessOrEqual(end),
-        ),
-      ).build().find();
+      filteredTransactions = transactionBox
+          .query(
+            Transaction_.transactionDate.greaterOrEqual(start).and(
+                  Transaction_.transactionDate.lessOrEqual(end),
+                ),
+          )
+          .build()
+          .find();
+    });
+  }
+
+  double _calculateTotalAmount() {
+    return filteredTransactions.fold(0.0, (total, transaction) {
+      return total +
+          transaction.lines.fold(
+            0.0,
+            (lineTotal, line) => lineTotal + (line.price * line.quantity),
+          );
     });
   }
 
@@ -85,7 +98,7 @@ class _ReportPageState extends State<ReportPage> {
   @override
   Widget build(BuildContext context) {
     final groupedTransactions = _groupTransactionsByDate();
-
+    final totalTransaction = _calculateTotalAmount();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Transactions'),
@@ -93,6 +106,51 @@ class _ReportPageState extends State<ReportPage> {
       ),
       body: Column(
         children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      const Text('Total Amount'),
+                      Text(
+                        '\$${totalTransaction.toStringAsFixed(2)}',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      const Text('Total Products'),
+                      Text(
+                        'Qty: ${filteredTransactions.fold<int>(0, (sum, transaction) {
+                          return sum +
+                              transaction.lines.fold<int>(
+                                0,
+                                (lineSum, line) => lineSum + line.quantity,
+                              );
+                        })}',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
@@ -144,7 +202,8 @@ class _ReportPageState extends State<ReportPage> {
                     : ListView.builder(
                         itemCount: groupedTransactions.keys.length,
                         itemBuilder: (context, index) {
-                          final date = groupedTransactions.keys.elementAt(index);
+                          final date =
+                              groupedTransactions.keys.elementAt(index);
                           final transactions = groupedTransactions[date]!;
 
                           return Column(
@@ -214,4 +273,3 @@ class _ReportPageState extends State<ReportPage> {
     );
   }
 }
-
