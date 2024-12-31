@@ -12,6 +12,7 @@ class OrderLineRepo {
   List<OrderLine> getAll() {
     return _orderLineBox.getAll();
   }
+
   OrderLine? getOrderLineById(int id) {
     return _orderLineBox.get(id);
   }

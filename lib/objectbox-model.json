@@ -79,7 +79,7 @@
     },
     {
       "id": "3:2735234876302347974",
-      "lastPropertyId": "5:5062604618596839203",
+      "lastPropertyId": "6:8061823468732040616",
       "name": "TransactionLine",
       "properties": [
         {
@@ -110,6 +110,14 @@
           "flags": 520,
           "indexId": "1:3998555411153740361",
           "relationTarget": "Transaction"
+        },
+        {
+          "id": "6:8061823468732040616",
+          "name": "productId",
+          "type": 11,
+          "flags": 520,
+          "indexId": "3:985402157974246446",
+          "relationTarget": "Product"
         }
       ],
       "relations": []
@@ -171,11 +179,63 @@
         }
       ],
       "relations": []
+    },
+    {
+      "id": "6:5260194287200954413",
+      "lastPropertyId": "2:4017685103978316228",
+      "name": "ActiveOrder",
+      "properties": [
+        {
+          "id": "1:4787918976565565922",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:4017685103978316228",
+          "name": "mode",
+          "type": 9
+        }
+      ],
+      "relations": [
+        {
+          "id": "3:8715418736358141241",
+          "name": "orderLines",
+          "targetId": "7:9186209019479773119"
+        }
+      ]
+    },
+    {
+      "id": "7:9186209019479773119",
+      "lastPropertyId": "3:1618962895628089314",
+      "name": "OrderLine",
+      "properties": [
+        {
+          "id": "1:1273825201003828061",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:3086162779892972604",
+          "name": "productId",
+          "type": 11,
+          "flags": 520,
+          "indexId": "2:8330785118113584278",
+          "relationTarget": "Product"
+        },
+        {
+          "id": "3:1618962895628089314",
+          "name": "quantity",
+          "type": 8
+        }
+      ],
+      "relations": []
     }
   ],
-  "lastEntityId": "5:319029168594019471",
-  "lastIndexId": "1:3998555411153740361",
-  "lastRelationId": "2:655632831297276494",
+  "lastEntityId": "7:9186209019479773119",
+  "lastIndexId": "3:985402157974246446",
+  "lastRelationId": "3:8715418736358141241",
   "lastSequenceId": "0:0",
   "modelVersion": 5,
   "modelVersionParserMinimum": 5,

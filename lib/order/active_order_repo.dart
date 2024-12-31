@@ -1,12 +1,13 @@
 
-import 'package:objectbox/objectbox.dart';
+
+import 'package:testooo/constant/order_mode.dart';
+import 'package:testooo/objectbox.g.dart';
 import 'package:testooo/order/active_order.dart';
 
 class ActiveOrderRepo {
   final Box<ActiveOrder> _activeOrderBox;
 
-  ActiveOrderRepo({required Box<ActiveOrder> activeOrderBox}) : _activeOrderBox = activeOrderBox;
-
+  ActiveOrderRepo(this._activeOrderBox);
   /// some methods to get active order from db
   ActiveOrder? getActiveOrderById(int id) {
     return _activeOrderBox.get(id);
@@ -16,6 +17,14 @@ class ActiveOrderRepo {
     return _activeOrderBox.getAll();
   }
 
+
+  /// Get all active orders with a specific mode
+  List<ActiveOrder> getActiveOrdersByMode(OrderMode mode) {
+    final query = _activeOrderBox.query(ActiveOrder_.mode.equals(mode.name)).build();
+    final orders = query.find();
+    query.close();
+    return orders;
+  }
 
   /// some methods to insert active order to db
   void insertActiveOrder(ActiveOrder activeOrder) {

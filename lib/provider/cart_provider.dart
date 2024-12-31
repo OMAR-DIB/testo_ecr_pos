@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:testooo/constant/order_mode.dart';
 import 'package:testooo/models/product.dart';
 import 'package:testooo/order/active_order.dart';
 import 'package:testooo/order/active_order_repo.dart';
@@ -23,24 +24,40 @@ class CartProvider extends ChangeNotifier {
       {required ActiveOrderRepo activeOrderBox,
       required OrderLineRepo orderLineRepo})
       : _activeOrderBox = activeOrderBox,
-        _orderLineRepo = orderLineRepo;
+        _orderLineRepo = orderLineRepo{
+       _refreshOrder();
+        }
+
+
+  /// refresh order with every opperation and on start getting the order by mode
+  void _refreshOrder() {
+    _orders = _activeOrderBox.getActiveOrdersByMode(OrderMode.delivery);
+    if (_orders.isNotEmpty) {
+      savedOrder = _orders.first;
+    } else {
+      // create new order if none exists
+
+      savedOrder = ActiveOrder(id: 0, mode: OrderMode.delivery.name);
+      _activeOrderBox.insertActiveOrder(savedOrder!);
+    }
+    notifyListeners();
+  }
+
+  // find product index if no product -1
+  int findProductIndex(Product product) {
+    return savedOrder?.orderLines.indexWhere((element) => element.product.target!.id == product.id) ?? -1;
+  }
+
 
   /// add order to cart from product
   void addOrder(Product product) {
-    int index = 0;
     // if no saved order, create a new one
-    savedOrder ??= ActiveOrder(id: 0, mode: 'none');
+    savedOrder ??= ActiveOrder(id: 0, mode: OrderMode.delivery.name);
 
     // check if the item already exists in the cart or not
-    bool itemExists = false;
-    for (var orderLine in savedOrder!.orderLines) {
-      if (orderLine.product.target!.id == product.id) {
-        itemExists = true;
-        break;
-      }
-    }
+    int index = findProductIndex(product);
     // if item already in the cart, increase its quantity
-    if (itemExists) {
+    if (index >= 0) {
       final index = savedOrder!.orderLines
           .indexWhere((element) => element.product.target!.id == product.id);
       savedOrder!.orderLines[index].quantity += 1;
@@ -54,7 +71,8 @@ class CartProvider extends ChangeNotifier {
       // insert the selected order
       _activeOrderBox.insertActiveOrder(savedOrder!);
     }
-    notifyListeners();
+    // refresh the order
+    _refreshOrder();
   }
 
   void removeOrderLine(Product product) {
@@ -62,15 +80,9 @@ class CartProvider extends ChangeNotifier {
     if (savedOrder == null) return;
 
     // check if the item already exists in the cart or not
-    bool itemExists = false;
-    for (var orderLine in savedOrder!.orderLines) {
-      if (orderLine.product.target!.id == product.id) {
-        itemExists = true;
-        break;
-      }
-    }
-    // if item already in the cart, decrease its quantity
-    if (itemExists) {
+    int index = findProductIndex(product);
+    // if item already in the cart, increase its quantity
+    if (index >= 0) {
       final index = savedOrder!.orderLines
           .indexWhere((element) => element.product.target!.id == product.id);
       if (savedOrder!.orderLines[index].quantity > 1) {
@@ -80,7 +92,8 @@ class CartProvider extends ChangeNotifier {
       }
       _orderLineRepo.deleteOrderLine(savedOrder!.orderLines[index]);
     }
-    notifyListeners();
+    // refresh the order
+    _refreshOrder();
   }
 
   void removeOrder(){
@@ -90,28 +103,16 @@ class CartProvider extends ChangeNotifier {
     }else{
       return;
     }
-    notifyListeners();
+    _refreshOrder();
   }
-
-
-  ////////////////////////////////////////
-  ////////////////////////////////////////
-  // Attention Attention : should be int //
-  ////////////////////////////////////////
-  ////////////////////////////////////////
 
   double productQuantity(Product product) {
     if (savedOrder == null) return 0;
+
     // check if the item already exists in the cart or not
-    bool itemExists = false;
-    for (var orderLine in savedOrder!.orderLines) {
-      if (orderLine.product.target!.id == product.id) {
-        itemExists = true;
-        break;
-      }
-    }
-    // if item already in the cart, return its quantity
-    if (itemExists) {
+    int index = findProductIndex(product);
+    // if item already in the cart, increase its quantity
+    if (index >= 0) {
       final index = savedOrder!.orderLines
           .indexWhere((element) => element.product.target!.id == product.id);
       return savedOrder!.orderLines[index].quantity;

@@ -1,53 +1,47 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:testooo/controller/cart_item_controller.dart';
 import 'package:testooo/controller/product_provider.dart';
-
-import 'package:testooo/main.dart';
-import 'package:testooo/models/cart_item.dart';
-import 'package:testooo/models/transaction/transaction.dart';
-import 'package:testooo/models/transaction/transaction_repo.dart';
-import 'package:testooo/models/transaction/transaction_service.dart';
+import 'package:testooo/provider/cart_provider.dart';
 import 'package:testooo/view/editable_text_field.dart';
-import 'package:testooo/view/payment_screen.dart';
 
 class ShowProduct extends StatelessWidget {
   const ShowProduct({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Access ProductProvider (for the product list)
     final productProvider = Provider.of<ProductProvider>(context);
-    final cartItemController = Provider.of<CartItemController>(context);
+    // Access CartProvider (for cart operations)
+    final cartProvider = Provider.of<CartProvider>(context);
 
+    final cartItemController = Provider.of<CartItemController>(context);
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 31, 110, 54), // AppBar background color
+        backgroundColor: const Color.fromARGB(255, 31, 110, 54),
         centerTitle: true,
         title: Padding(
-          padding: const EdgeInsets.symmetric(
-              vertical: 16.0), // Adjust vertical spacing
+          padding: const EdgeInsets.symmetric(vertical: 16.0),
           child: Container(
-            height: 40, // Make the search bar smaller
+            height: 40,
             width: 600,
             child: TextField(
               decoration: InputDecoration(
                 hintText: 'Search products...',
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
-                fillColor:
-                    Colors.grey[300], // Background color for the search bar
-                contentPadding: const EdgeInsets.symmetric(
-                    vertical: 0, horizontal: 8), // Adjust inner padding
+                fillColor: Colors.grey[300],
+                contentPadding:
+                    const EdgeInsets.symmetric(vertical: 0, horizontal: 8),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide.none, // Remove the default border
+                  borderSide: BorderSide.none,
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: const BorderSide(
-                    color: Colors.black26, // Focused border color
+                    color: Colors.black26,
                     width: 1.5,
                   ),
                 ),
@@ -73,9 +67,11 @@ class ShowProduct extends StatelessWidget {
                 itemCount: productProvider.products.length,
                 itemBuilder: (context, index) {
                   final product = productProvider.products[index];
+
                   return GestureDetector(
                     onTap: () {
-                      cartItemController.addProduct(product);
+                      // Add product to cart using CartProvider
+                      cartProvider.addOrder(product);
                     },
                     child: Card(
                       elevation: 4,
@@ -171,7 +167,8 @@ class ShowProduct extends StatelessWidget {
                           icon:
                               const Icon(Icons.clear_all, color: Colors.white),
                           onPressed: () {
-                            cartItemController.clearCart();
+                            // Clear all items from the cart
+                            cartProvider.removeOrder();
                           },
                         ),
                       ],
@@ -206,10 +203,13 @@ class ShowProduct extends StatelessWidget {
                   const SizedBox(height: 16),
                   Expanded(
                     child: ListView.builder(
-                      itemCount: cartItemController.cartItems.length,
+                      itemCount:
+                          cartProvider.savedOrder?.orderLines.length ?? 0,
                       itemBuilder: (context, index) {
-                        final cartItem = cartItemController.cartItems[index];
-
+                        final orderLine =
+                            cartProvider.savedOrder!.orderLines[index];
+                        final product = orderLine.product.target!;
+                        // final cartItem = cartItemController.cartItems[index];
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 8.0),
                           child: Row(
@@ -220,7 +220,7 @@ class ShowProduct extends StatelessWidget {
                               Expanded(
                                 flex: 3,
                                 child: Text(
-                                  cartItem.product.name,
+                                  product.name,
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(fontSize: 16),
@@ -231,12 +231,11 @@ class ShowProduct extends StatelessWidget {
                               Expanded(
                                 flex: 2,
                                 child: EditableTextField(
-                                  value: cartItem.discount,
+                                  value: 0,
                                   hintText: 'Enter discount',
                                   onChanged: (value) {
                                     final discount = value;
-                                    cartItemController.updateDiscount(
-                                        cartItem.product, discount);
+                                    
                                   },
                                 ),
                               ),
@@ -245,7 +244,7 @@ class ShowProduct extends StatelessWidget {
                               Expanded(
                                 flex: 1,
                                 child: Text(
-                                  '${cartItem.quantity}',
+                                  '${orderLine.quantity}',
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(color: Colors.grey),
                                 ),
@@ -255,16 +254,16 @@ class ShowProduct extends StatelessWidget {
                               Expanded(
                                 flex: 2,
                                 child: Text(
-                                  '\$${cartItem.subPrice.toStringAsFixed(2)}',
+                                  '\$${orderLine.total.toStringAsFixed(2)}',
                                   textAlign: TextAlign.right,
                                   style: const TextStyle(fontSize: 16),
                                 ),
                               ),
                               IconButton(
-                                icon: const Icon(Icons.more_vert),
+                                icon: const Icon(Icons.remove_circle),
                                 onPressed: () {
-                                  cartItemController.openActionDrawer(
-                                      context, cartItem, cartItemController);
+                                  // Remove product from cart
+                                  cartProvider.removeOrderLine(product);
                                 },
                               ),
                             ],
@@ -273,184 +272,23 @@ class ShowProduct extends StatelessWidget {
                       },
                     ),
                   ),
-
-                  // Discount Field
-
                   const SizedBox(height: 16),
-                  // Updated Total Price
+                  // Total Price
                   Text(
-                    'Total: \$${cartItemController.totalPrice.toStringAsFixed(2)}',
+                    'Total: \$${cartProvider.savedOrder?.total.toStringAsFixed(2) ?? 0.00}',
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.amber, // Background color
-                          borderRadius:
-                              BorderRadius.circular(6), // Rounded corners
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black
-                                  .withOpacity(0.1), // Subtle shadow
-                              spreadRadius: 2,
-                              blurRadius: 6,
-                              offset: const Offset(0, 3), // Shadow position
-                            ),
-                          ],
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 26, vertical: 6), // Inner padding
-                        child: TextButton.icon(
-                          style: TextButton.styleFrom(
-                            foregroundColor: Colors.white, // Text color
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 10, horizontal: 16),
-                          ),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => PaymentScreen(
-                                  cartItems: cartItemController
-                                      .cartItems, // List of CartItem
-                                  transactionService:
-                                      TransactionService(TransactionRepo()),
-                                ),
-                              ),
-                            );
-                          },
-                          label: const Column(
-                            children: [
-                              Icon(
-                                Icons.payment,
-                                color: Colors.black, // Icon color
-                                size: 24, // Icon size
-                              ),
-                              SizedBox(
-                                  height:
-                                      4), // Optional spacing between icon and text
-                              Text(
-                                'Pay',
-                                style: TextStyle(
-                                  fontSize: 16, // Font size
-                                  fontWeight: FontWeight.bold, // Bold text
-                                  color: Colors.black, // Text color
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(
-                        width: 3,
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.red, // Background color
-                          borderRadius:
-                              BorderRadius.circular(6), // Rounded corners
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black
-                                  .withOpacity(0.1), // Subtle shadow
-                              spreadRadius: 2,
-                              blurRadius: 6,
-                              offset: const Offset(0, 3), // Shadow position
-                            ),
-                          ],
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 26, vertical: 6), // Inner padding
-                        child: TextButton.icon(
-                          style: TextButton.styleFrom(
-                            foregroundColor: Colors.white, // Text color
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 10, horizontal: 16),
-                          ),
-                          onPressed: () {
-                            cartItemController.clearCart();
-                          },
-                          label: const Column(
-                            children: [
-                              Icon(
-                                Icons.payment,
-                                color: Colors.black, // Icon color
-                                size: 24, // Icon size
-                              ),
-                              SizedBox(
-                                  height:
-                                      4), // Optional spacing between icon and text
-                              Text(
-                                'Delete',
-                                style: TextStyle(
-                                  fontSize: 16, // Font size
-                                  fontWeight: FontWeight.bold, // Bold text
-                                  color: Colors.black, // Text color
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(
-                        width: 3,
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.grey, // Background color
-                          borderRadius:
-                              BorderRadius.circular(6), // Rounded corners
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black
-                                  .withOpacity(0.1), // Subtle shadow
-                              spreadRadius: 2,
-                              blurRadius: 6,
-                              offset: const Offset(0, 3), // Shadow position
-                            ),
-                          ],
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 26, vertical: 6), // Inner padding
-                        child: TextButton.icon(
-                          style: TextButton.styleFrom(
-                            foregroundColor: Colors.white, // Text color
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 10, horizontal: 16),
-                          ),
-                          onPressed: () {
-                            // cartItemController.clearCart();
-                            // go to report page
-                          },
-                          label: const Column(
-                            children: [
-                              Icon(
-                                Icons.print,
-                                color: Colors.black, // Icon color
-                                size: 24, // Icon size
-                              ),
-                              SizedBox(
-                                  height:
-                                      4), // Optional spacing between icon and text
-                              Text(
-                                'Print',
-                                style: TextStyle(
-                                  fontSize: 16, // Font size
-                                  fontWeight: FontWeight.bold, // Bold text
-                                  color: Colors.black, // Text color
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      // Handle payment or confirmation
+                      print('Proceed to payment');
+                    },
+                    child: const Text('Pay Now'),
+                  ),
                 ],
               ),
             ),

@@ -18,6 +18,7 @@ class Product {
   double tva;
 
   /// Time the product was created
+  @Property(type: PropertyType.dateNano)
   DateTime createdAt;
 
   Product({
