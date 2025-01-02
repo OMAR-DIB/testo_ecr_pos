@@ -48,4 +48,12 @@ class ActiveOrderRepo {
   int countActiveOrder() {
     return _activeOrderBox.count();
   }
+
+  // some methods to get all carts from db
+  // List<ActiveOrder> getAllCarts() {
+  //   final query = _activeOrderBox.query(ActiveOrder_.mode.equals(OrderMode.cart.name)).build();
+  //   final carts = query.find();
+  //   query.close();
+  //   return carts;
+  // }
 }

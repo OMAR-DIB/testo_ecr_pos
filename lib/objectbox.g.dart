@@ -225,7 +225,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
       id: const obx_int.IdUid(7, 9186209019479773119),
       name: 'OrderLine',
-      lastPropertyId: const obx_int.IdUid(3, 1618962895628089314),
+      lastPropertyId: const obx_int.IdUid(4, 2838243332597791914),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
@@ -243,6 +243,11 @@ final _entities = <obx_int.ModelEntity>[
         obx_int.ModelProperty(
             id: const obx_int.IdUid(3, 1618962895628089314),
             name: 'quantity',
+            type: 8,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(4, 2838243332597791914),
+            name: 'discount',
             type: 8,
             flags: 0)
       ],
@@ -520,11 +525,10 @@ obx_int.ModelDefinition getObjectBoxModel() {
         objectFromFB: (obx.Store store, ByteData fbData) {
           final buffer = fb.BufferContext(fbData);
           final rootOffset = buffer.derefObject(0);
-          final idParam =
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
           final modeParam = const fb.StringReader(asciiOptimization: true)
               .vTableGet(buffer, rootOffset, 6, '');
-          final object = ActiveOrder(id: idParam, mode: modeParam);
+          final object = ActiveOrder(mode: modeParam)
+            ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
           obx_int.InternalToManyAccess.setRelInfo<ActiveOrder>(
               object.orderLines,
               store,
@@ -540,10 +544,11 @@ obx_int.ModelDefinition getObjectBoxModel() {
           object.id = id;
         },
         objectToFB: (OrderLine object, fb.Builder fbb) {
-          fbb.startTable(4);
+          fbb.startTable(5);
           fbb.addInt64(0, object.id);
           fbb.addInt64(1, object.product.targetId);
           fbb.addFloat64(2, object.quantity);
+          fbb.addFloat64(3, object.discount);
           fbb.finish(fbb.endTable());
           return object.id;
         },
@@ -554,7 +559,10 @@ obx_int.ModelDefinition getObjectBoxModel() {
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
           final quantityParam =
               const fb.Float64Reader().vTableGet(buffer, rootOffset, 8, 0);
-          final object = OrderLine(id: idParam, quantity: quantityParam);
+          final discountParam =
+              const fb.Float64Reader().vTableGet(buffer, rootOffset, 10, 0);
+          final object = OrderLine(
+              id: idParam, quantity: quantityParam, discount: discountParam);
           object.product.targetId =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 6, 0);
           object.product.attach(store);
@@ -707,4 +715,8 @@ class OrderLine_ {
   /// See [OrderLine.quantity].
   static final quantity =
       obx.QueryDoubleProperty<OrderLine>(_entities[6].properties[2]);
+
+  /// See [OrderLine.discount].
+  static final discount =
+      obx.QueryDoubleProperty<OrderLine>(_entities[6].properties[3]);
 }

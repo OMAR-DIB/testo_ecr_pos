@@ -8,17 +8,18 @@ import '../../utils/calculation_utils.dart';
 class ActiveOrder {
   /// Product id
   @Id()
-  int id;
+  int id = 0;
 
   /// Order mode
   String mode;
+
+  
 
   /// Order lines
   ToMany<OrderLine> orderLines = ToMany<OrderLine>();
 
   /// Constructor
   ActiveOrder({
-    required this.id,
     required this.mode,
   });
 
@@ -35,6 +36,15 @@ class ActiveOrder {
       total += orderLine.total;
     }
     return CalculationUtils.fixPrecision(total, 2);
+  }
+
+  // total discount of the order
+  double get totalDiscount {
+    double totalDiscount = 0;
+    for (final orderLine in orderLines) {
+      totalDiscount += orderLine.discount;
+    }
+    return CalculationUtils.fixPrecision(totalDiscount, 2);
   }
 
   /// Total VAT amount of the order

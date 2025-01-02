@@ -17,10 +17,14 @@ class OrderLine {
   /// Quantity
   double quantity;
 
+  // New discount field (specific to this order line)
+  double discount;
+
   /// Constructor
   OrderLine({
     required this.id,
     required this.quantity,
+    this.discount = 0.0,
   });
 
   /// two order lines are equal if they have the same product
@@ -37,12 +41,15 @@ class OrderLine {
   /// String representation of the order line
   @override
   String toString() {
-    return 'OrderLine{id: $id, productId: ${product.target!.id}, quantity: $quantity}';
+    return 'OrderLine{id: $id, productId: ${product.target!.id}, quantity: $quantity, discount: $discount}';
   }
 
-  /// Total price of the order line
-  double get total =>
-      CalculationUtils.fixPrecision(product.target!.price * quantity, 2);
+  // Calculate the total price with discount
+  double get total {
+    double originalPrice = product.target!.price * quantity;
+    double discountedPrice = originalPrice * (1 - discount / 100);
+    return CalculationUtils.fixPrecision(discountedPrice, 2);
+  }
 
   /// VAT amount of the order line
   double get vatAmount =>

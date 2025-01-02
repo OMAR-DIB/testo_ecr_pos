@@ -20,6 +20,8 @@ class App extends StatelessWidget {
           ? AppRoutes.login
           : AppRoutes.setup,
       onGenerateRoute: RoutesGenerator.generateRoute,
+      // showPerformanceOverlay: true,
+      // showSemanticsDebugger: true,
     );
   }
 }
