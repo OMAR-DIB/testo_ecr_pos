@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -43,9 +45,42 @@ void main() async {
                 activeOrderBox: ActiveOrderRepo(gloablObx.store.box()),
                 orderLineRepo: OrderLineRepo(gloablObx.store.box()))),
         ChangeNotifierProvider(
-            create: (_) => CartManager(),),
+          create: (_) => CartManager(),
+        ),
       ],
-      child: const App(),
+      child: Builder(builder: (context) {
+        // init products repo
+        ProductRepository productRepo =
+            ProductRepository(gloablObx.store.box<Product>());
+      //    context.read<ProductProvider>().        // create 100 products
+      //   for (int i = 0; i < 100; i++) {
+      //     context.read<ProductProvider>().addProduct(Product(
+      //         name: 'Product $i',
+      //         price: Random().nextDouble() * 100,
+      //         tva: 10,
+      //         description: 'Description $i'));
+      // }
+            // remove all orders
+        // context.read<CartProvider>().removeAllOrders();
+
+        // // create 500 order
+        // for (int i = 0; i < 100; i++) {
+        //   print('Creating order $i');
+        //   context.read<CartProvider>().createNewOrder();
+        //   context
+        //       .read<CartProvider>()
+        //       .switchCart(context.read<CartProvider>().lastIndex);
+        //   // add all products to the order
+        //   for (Product product in productRepo.getAllProducts()) {
+        //     int randomInt = Random().nextInt(100);
+        //     if (randomInt % 2 == 0) {
+        //       context.read<CartProvider>().addOrder(product);
+        //     }
+        //   }
+        // }
+        // print("Orders created");
+        return const App();
+      }),
     ),
   );
 }

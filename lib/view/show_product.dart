@@ -156,41 +156,45 @@ class ShowProduct extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Container(
-  height: 50,
-  child: ListView.builder(
-    scrollDirection: Axis.horizontal,
-    itemCount: cartProvider.orders.length, // Use total number of carts
-    itemBuilder: (context, index) {
-      return GestureDetector(
-        onTap: () {
-          cartProvider.switchCart(index); // Switch to the selected cart
-          print('Switched to Cart ${index + 1}');
-        },
-        child: Card(
-          color: cartProvider.currentCart?.id == cartProvider.orders[index].id
-              ? Colors.green // Highlight active cart
-              : Colors.grey,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              'Cart ${index + 1}',
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
-      );
-    },
-  ),
-),),
-IconButton(
-  icon: const Icon(Icons.add),
-  onPressed: () {
-    cartProvider.createNewOrder();
-  },
-),
+                      height: 50,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: cartProvider
+                            .orders.length, // Use total number of carts
+                        itemBuilder: (context, index) {
+                          return GestureDetector(
+                            onTap: () {
+                              cartProvider.switchCart(
+                                  index); // Switch to the selected cart
+                              print('Switched to Cart ${index + 1}');
+                            },
+                            child: Card(
+                              color: cartProvider.currentCart?.id ==
+                                      cartProvider.orders[index].id
+                                  ? Colors.green // Highlight active cart
+                                  : Colors.grey,
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  'Cart ${index + 1}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.add),
+                    onPressed: () {
+                      cartProvider.createNewOrder();
+                    },
+                  ),
                   const SizedBox(height: 16),
                   const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -253,8 +257,8 @@ IconButton(
                                   hintText: 'Enter discount',
                                   onChanged: (value) {
                                     final discount = value;
-                                    // cartProvider.updateDiscountInCart(
-                                    //     product, discount);
+                                    cartProvider.updateDiscount(
+                                        product, discount);
                                   },
                                 ),
                               ),
@@ -267,8 +271,8 @@ IconButton(
                                   hintText: 'Enter quantity',
                                   onChanged: (value) {
                                     final qty = value;
-                                    // cartProvider.updateQuantityInCart(
-                                    //     product, qty);
+                                    cartProvider.updateQuantity(
+                                        product, qty);
                                   },
                                 ),
                               ),
@@ -384,7 +388,7 @@ IconButton(
                                 vertical: 10, horizontal: 16),
                           ),
                           onPressed: () {
-                            cartProvider.removeOrder();
+                            cartProvider.removeAllOrders();
                           },
                           label: const Column(
                             children: [

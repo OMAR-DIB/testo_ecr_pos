@@ -6,8 +6,6 @@ import 'package:testooo/order/active_order_repo.dart';
 import 'package:testooo/orderLine/order_line.dart';
 import 'package:testooo/orderLine/order_line_repo.dart';
 
-
-
 class CartProvider extends ChangeNotifier {
   /// Active orders repository
   final ActiveOrderRepo _activeOrderBox;
@@ -17,15 +15,18 @@ class CartProvider extends ChangeNotifier {
 
   /// List of active orders
   List<ActiveOrder> orders = [];
+
+  /// Index of the current cart in the orders list
   int _currentCartIndex = 0;
 
-  ActiveOrder? get currentCart => 
+  /// Gets the last index of the orders list
+  int get lastIndex => orders.length - 1;
+
+  /// Gets the current cart if it exists, otherwise null
+  ActiveOrder? get currentCart =>
       orders.isNotEmpty ? orders[_currentCartIndex] : null;
 
-  ActiveOrder? get savedOrder => orders.isNotEmpty 
-      ? orders[_currentCartIndex] 
-      : null;
-
+  /// CartProvider constructor
   CartProvider({
     required ActiveOrderRepo activeOrderBox,
     required OrderLineRepo orderLineRepo,
@@ -34,6 +35,7 @@ class CartProvider extends ChangeNotifier {
     _refreshOrders();
   }
 
+  /// Refreshes the list of active orders and creates a new cart if none exist
   void _refreshOrders() {
     orders = _activeOrderBox.getActiveOrdersByMode(OrderMode.delivery);
     if (orders.isEmpty) {
@@ -42,10 +44,10 @@ class CartProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Adds a new cart to the orders list
   void _addNewCart() {
     final newCart = ActiveOrder(
       mode: OrderMode.delivery.name,
-      
     );
     orders.add(newCart);
     _activeOrderBox.insertActiveOrder(newCart);
@@ -53,19 +55,21 @@ class CartProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Switches the current cart to the cart at the specified index
   void switchCart(int index) {
-    if (index >= 0 && index < orders.length) {
+    if (index >= 0 && index < orders.length && index != _currentCartIndex) {
       _currentCartIndex = index;
       notifyListeners(); // Notify listeners to refresh the UI
     }
   }
 
+  /// Adds a product to the current cart
   void addOrder(Product product) {
     if (currentCart == null) return;
 
     // Check if the item already exists in the current cart
     int index = findProductIndex(product);
-    
+
     if (index >= 0) {
       // If item exists, increase quantity
       currentCart!.orderLines[index].quantity += 1;
@@ -83,37 +87,32 @@ class CartProvider extends ChangeNotifier {
     notifyListeners(); // Notify listeners to refresh the UI
   }
 
+  /// Removes all the order lines (products) from the current cart
   void removeOrderLine(Product product) {
     if (currentCart == null) return;
 
     int index = findProductIndex(product);
 
     if (index >= 0) {
-      if (currentCart!.orderLines[index].quantity > 1) {
-        // Decrease quantity if greater than 1
-        currentCart!.orderLines[index].quantity -= 1;
-      } else {
-        // Remove the order line if quantity is 1
-        _orderLineRepo.deleteOrderLine(currentCart!.orderLines[index]);
-        currentCart!.orderLines.removeAt(index);
+      // Collect all order lines for the product
+      List<OrderLine> linesToRemove = currentCart!.orderLines
+          .where((orderLine) => orderLine.product.target!.id == product.id)
+          .toList();
+
+      // Remove each order line using the repository
+      for (var orderLine in linesToRemove) {
+        _orderLineRepo.deleteOrderLine(orderLine);
+        currentCart!.orderLines.remove(orderLine);
       }
     }
 
     notifyListeners(); // Notify listeners to refresh the UI
   }
 
-  void removeOrder() {
-    if (currentCart != null) {
-      _activeOrderBox.deleteActiveOrder(currentCart!);
-      orders.removeAt(_currentCartIndex);
-      _currentCartIndex = orders.isNotEmpty ? 0 : -1; // Reset index if no carts left
-      notifyListeners();
-    }
-  }
-
+  /// Finds the index of a product in the current cart's order lines
   int findProductIndex(Product product) {
-    return currentCart?.orderLines
-            .indexWhere((element) => element.product.target!.id == product.id) ??
+    return currentCart?.orderLines.indexWhere(
+            (element) => element.product.target!.id == product.id) ??
         -1;
   }
 
@@ -126,5 +125,50 @@ class CartProvider extends ChangeNotifier {
 
   void createNewOrder() {
     _addNewCart();
+  }
+
+  // This function encapsulates the common logic for updating order lines
+  void _updateOrderLine(Product product, Function(OrderLine) updateFunction) {
+    if (currentCart == null) return;
+
+    // Check if the item already exists in the cart
+    int index = findProductIndex(product);
+    if (index >= 0) {
+      final orderLineIndex = currentCart!.orderLines
+          .indexWhere((element) => element.product.target!.id == product.id);
+
+      // Use the provided update function to modify the order line
+      updateFunction(currentCart!.orderLines[orderLineIndex]);
+
+      _orderLineRepo.insertOrderLine(currentCart!.orderLines[orderLineIndex]);
+    }
+    // Refresh the order
+    notifyListeners();
+  }
+
+  void updateDiscount(Product product, double discount) {
+    _updateOrderLine(product, (orderLine) {
+      orderLine.discount = discount;
+    });
+  }
+
+  void updateQuantity(Product product, double quantity) {
+    _updateOrderLine(product, (orderLine) {
+      orderLine.quantity = quantity;
+    });
+  }
+  
+  /// expect issue here
+  void removeAllOrders() {
+    if (currentCart != null) {
+      // Clear order lines in RAM
+      currentCart!.orderLines.clear();
+
+      // Persist changes to ObjectBox
+      _activeOrderBox.updateActiveOrder(currentCart!);
+
+      // Notify listeners about the change
+      notifyListeners();
+    }
   }
 }

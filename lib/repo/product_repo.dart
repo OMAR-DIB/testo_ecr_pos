@@ -7,7 +7,7 @@ class ProductRepository {
 
   ProductRepository(this._productBox);
 
-  Future<List<Product>> getAllProducts() async {
+  List<Product> getAllProducts()  {
     return _productBox.getAll();
   }
 

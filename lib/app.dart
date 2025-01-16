@@ -13,12 +13,10 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       title: 'POS App',
       debugShowCheckedModeBanner: false,
-      initialRoute: setupPrefs.isSetupComplete()
-          ? AppRoutes.login
-          : AppRoutes.setup,
+      initialRoute: AppRoutes.login,
       onGenerateRoute: RoutesGenerator.generateRoute,
       // showPerformanceOverlay: true,
       // showSemanticsDebugger: true,
